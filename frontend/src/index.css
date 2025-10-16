@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+:root { --glass-bg: rgba(255,255,255,0.06); }
+html,body,#root { font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+/* Glass card */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px) saturate(120%);
+}
+
+/* Neon glow for CTAs */
+.btn-glow {
+  box-shadow: 0 6px 20px rgba(255,99,132,0.12), 0 2px 8px rgba(0,0,0,0.12);
+}
+
+/* floating subtle gradient background shapes */
+.bg-shape {
+  position: absolute;
+  filter: blur(60px);
+  opacity: 0.6;
+  transform: translate3d(0,0,0);
+  pointer-events: none;
+}
+
