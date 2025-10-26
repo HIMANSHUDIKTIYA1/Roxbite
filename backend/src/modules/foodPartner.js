@@ -13,7 +13,24 @@ const foodPartnerSchema = new mongoose.Schema({
    password: {
        type: String,
        require: true
-   }
+   } ,
+   specialty: {
+       type: String,
+    
+   },
+   location: {
+       type: String,
+      
+   },
+   phone: {
+       type: String,
+     
+   },
+   bio: {
+       type: String,
+    
+   },
+   dpImage: { type: String }
 });
 
 const FoodPartner = mongoose.model('FoodPartner', foodPartnerSchema);

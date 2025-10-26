@@ -1,0 +1,478 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  User, Camera, MapPin, Phone, Mail, 
+  Star, Package, X, Upload, Utensils, 
+  FileText, Loader2, Plus, Settings
+} from 'lucide-react';
+
+const FoodPartnerProfile = () => {
+  const [showCreateFood, setShowCreateFood] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(false);
+  
+  // Profile Data
+  const [profileData, setProfileData] = useState({
+    partnerName: '',
+    bio: '',
+    location: '',
+    phone: '',
+    email: '',
+    specialty: ''
+  });
+
+  // Food Form Data
+  const [foodData, setFoodData] = useState({
+    name: '',
+    description: '',
+    videoUrl: null
+  });
+
+  const [stats] = useState({
+    totalProducts: 12,
+    totalOrders: 456,
+    rating: 4.7
+  });
+
+  // Handle profile image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle profile input change
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle food form input change
+  const handleFoodChange = (e) => {
+    const { name, value, files } = e.target;
+    
+    if (name === 'videoUrl') {
+      const file = files[0];
+      if (file) {
+        setPreview(URL.createObjectURL(file));
+        setFoodData(prev => ({ ...prev, [name]: file }));
+      }
+    } else {
+      setFoodData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Submit profile data
+  const handleProfileSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Send to backend: profileData + profileImage
+      console.log('Profile Data:', { ...profileData, profileImage });
+      // await axios.post('http://localhost:3000/api/partner/profile', formDataToSend);
+      alert('Profile saved successfully!');
+    } catch (error) {
+      console.error('Error saving profile:', error);
+    }
+  };
+
+  // Submit food creation
+  const handleFoodSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { name, description, videoUrl } = foodData;
+
+    if (!name || !description || !videoUrl) {
+      alert('Please fill all fields!');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Send to backend
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', name);
+      formDataToSend.append('description', description);
+      formDataToSend.append('videoUrl', videoUrl);
+      formDataToSend.append('partnerName', profileData.partnerName);
+      
+      // await axios.post('http://localhost:3000/api/food', formDataToSend);
+      
+      console.log('Food Data:', { name, description, videoUrl, partnerName: profileData.partnerName });
+      alert('Food created successfully!');
+      
+      setFoodData({ name: '', description: '', videoUrl: null });
+      setPreview(null);
+      setShowCreateFood(false);
+    } catch (err) {
+      console.error(err);
+      alert('Error creating food');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-gray-900 dark:to-gray-800 pb-10">
+      {/* Profile Header */}
+      <div className="relative">
+        {/* Cover Section */}
+        <div className="h-40 md:h-48 bg-gradient-to-r from-orange-400 via-red-500 to-pink-500" />
+        
+        {/* Profile Content */}
+        <div className="max-w-4xl mx-auto px-4 -mt-16 relative z-10">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-8">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              {/* Profile Image */}
+              <div className="relative">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-orange-400 to-red-500 p-1 shadow-xl"
+                >
+                  <div className="w-full h-full rounded-full bg-white dark:bg-gray-700 overflow-hidden">
+                    {profileImage ? (
+                      <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100">
+                        <User className="w-12 h-12 text-orange-500" />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+                
+                <label htmlFor="profileImg" className="absolute bottom-0 right-0 cursor-pointer">
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-2 rounded-full shadow-lg"
+                  >
+                    <Camera size={16} />
+                  </motion.div>
+                  <input
+                    type="file"
+                    id="profileImg"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Profile Info */}
+              <div className="flex-1">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-2">
+                  {profileData.partnerName || 'Food Partner'}
+                </h1>
+                <p className="text-gray-600 dark:text-gray-300 mb-3">
+                  {profileData.specialty || 'Food Specialist'}
+                </p>
+                
+                <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex items-center gap-1">
+                    <MapPin size={14} className="text-red-500" />
+                    <span>{profileData.location || 'Location'}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Phone size={14} className="text-red-500" />
+                    <span>{profileData.phone || 'Phone'}</span>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-gray-700 dark:to-gray-600 p-3 rounded-xl text-center"
+                  >
+                    <Package className="w-5 h-5 text-orange-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-gray-800 dark:text-white">{stats.totalProducts}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Products</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className="bg-gradient-to-br from-red-50 to-red-100 dark:from-gray-700 dark:to-gray-600 p-3 rounded-xl text-center"
+                  >
+                    <Utensils className="w-5 h-5 text-red-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-gray-800 dark:text-white">{stats.totalOrders}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Orders</p>
+                  </motion.div>
+
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-gray-700 dark:to-gray-600 p-3 rounded-xl text-center"
+                  >
+                    <Star className="w-5 h-5 text-yellow-500 mx-auto mb-1" />
+                    <p className="text-lg font-bold text-gray-800 dark:text-white">{stats.rating}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">Rating</p>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowCreateFood(true)}
+                className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-full font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+              >
+                <Plus size={20} />
+                Create Food
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 p-3 rounded-full hover:bg-gray-50 dark:hover:bg-gray-600 transition-all"
+              >
+                <Settings size={20} />
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Form */}
+      <div className="max-w-4xl mx-auto px-4 mt-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+            <User className="text-red-500" />
+            Profile Details
+          </h2>
+
+          <form onSubmit={handleProfileSubmit} className="grid md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                Partner Name *
+              </label>
+              <input
+                type="text"
+                name="partnerName"
+                value={profileData.partnerName}
+                onChange={handleProfileChange}
+                required
+                placeholder="Enter your name"
+                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                Specialty *
+              </label>
+              <input
+                type="text"
+                name="specialty"
+                value={profileData.specialty}
+                onChange={handleProfileChange}
+                required
+                placeholder="e.g., North Indian Cuisine"
+                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                Location *
+              </label>
+              <input
+                type="text"
+                name="location"
+                value={profileData.location}
+                onChange={handleProfileChange}
+                required
+                placeholder="City, Country"
+                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                Phone Number *
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                value={profileData.phone}
+                onChange={handleProfileChange}
+                required
+                placeholder="+91 12345 67890"
+                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                Email *
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={profileData.email}
+                onChange={handleProfileChange}
+                required
+                placeholder="your@email.com"
+                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                Bio
+              </label>
+              <textarea
+                name="bio"
+                value={profileData.bio}
+                onChange={handleProfileChange}
+                rows={3}
+                placeholder="Tell us about yourself..."
+                className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all resize-none"
+              />
+            </div>
+
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="md:col-span-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+            >
+              Save Profile
+            </motion.button>
+          </form>
+        </div>
+      </div>
+
+      {/* Create Food Modal */}
+      <AnimatePresence>
+        {showCreateFood && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setShowCreateFood(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 md:p-8 w-full max-w-lg my-8"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <Utensils className="w-7 h-7 text-red-500" />
+                  <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                    Create New Food
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setShowCreateFood(false)}
+                  className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-all"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleFoodSubmit} className="flex flex-col gap-5">
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                    Food Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={foodData.name}
+                    onChange={handleFoodChange}
+                    required
+                    placeholder="Enter food name"
+                    className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                    Description *
+                  </label>
+                  <textarea
+                    name="description"
+                    value={foodData.description}
+                    onChange={handleFoodChange}
+                    required
+                    rows={3}
+                    placeholder="Describe your food..."
+                    className="w-full border-2 border-gray-300 dark:border-gray-600 rounded-xl px-4 py-3 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 dark:text-gray-300 font-semibold mb-2">
+                    Upload Food Video *
+                  </label>
+                  <label
+                    htmlFor="videoUpload"
+                    className="flex flex-col items-center justify-center border-2 border-dashed border-red-400 rounded-2xl py-8 hover:bg-red-50 dark:hover:bg-gray-700 transition-all cursor-pointer"
+                  >
+                    <Upload className="w-10 h-10 text-red-500 mb-2" />
+                    <span className="text-red-500 font-semibold">Click to Upload Video</span>
+                    <span className="text-gray-500 text-sm mt-1">MP4, MOV up to 50MB</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="videoUpload"
+                    name="videoUrl"
+                    accept="video/*"
+                    onChange={handleFoodChange}
+                    className="hidden"
+                  />
+
+                  {preview && (
+                    <motion.video
+                      src={preview}
+                      controls
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-4 rounded-2xl w-full shadow-lg"
+                    />
+                  )}
+                </div>
+
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileHover={{ scale: loading ? 1 : 1.02 }}
+                  whileTap={{ scale: loading ? 1 : 0.98 }}
+                  className="mt-4 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" /> 
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className="w-5 h-5" /> 
+                      Create Food
+                    </>
+                  )}
+                </motion.button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default FoodPartnerProfile;

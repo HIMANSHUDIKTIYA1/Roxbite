@@ -33,7 +33,7 @@ const ChooseRegister = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          Join the Foodverse 🍽️
+          Join the RoxBite 🍽️
         </motion.h1>
         <p className="text-gray-600 dark:text-gray-300 mb-6">
           Choose your role to get started with us.

@@ -2,6 +2,7 @@ const User = require('../modules/users')
 const FoodPartner = require('../modules/foodPartner')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const authMiddleware = require('../middlewares/auth.middleware')
 
 const  registerUser = async (req , res) =>{
     const {fullname , email , password} = req.body ; 
@@ -106,7 +107,7 @@ bcrypt.compare(password, newPartner.password, (err, result) => {
 const loginPartner = async(req, res) => {
   const   {email , password} = req.body ;
 
-  const partner = await FoodPartner.find({email})
+  const partner = await FoodPartner.findOne({ email })
   if(!partner){
     res.status(400).json({message: "Invalid email or password"})
 
@@ -123,7 +124,7 @@ const loginPartner = async(req, res) => {
     
     const token = jwt.sign({ id: partner._id }, process.env.JWT_SECRET);
     res.cookie('token', token);
-     res.status(200).json({ message: 'Login successful' });
+     res.status(200).json({ message: 'Login successful' , data : partner });
   
 }
 
@@ -132,5 +133,50 @@ const logoutPartner = (req, res) => {
     res.status(200).json({ message: 'Logout successful' });
 };
 
-module.exports = { registerUser, loginUser, logoutUser , registerPartner , loginPartner , logoutPartner};
+ const updateFoodPartnerProfile = async (req, res) => {
+  const { fullname, specialty, location, phone, email, bio , dpImage } = req.body;
+    // const partnerId = req.foodPartner._id;
+
+  try {
+    const updatedPartner = await FoodPartner.findOneAndUpdate(
+      { email: email },
+      { fullname, email, specialty, location, phone, bio  , dpImage }, 
+      { new: true, runValidators: true } 
+    );
+    if (!updatedPartner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      data: updatedPartner,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+const getFoodPartnerProfile = async (req, res) => {
+   const partnerId = req.foodPartner._id;
+    
+   
+
+  try {
+     const partner = await FoodPartner.findById(partnerId).select("-password");
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+
+    res.status(200).json({
+      message: "Profile fetched successfully",
+      data: partner,
+    });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, logoutUser , registerPartner , loginPartner , logoutPartner, updateFoodPartnerProfile , getFoodPartnerProfile };
 

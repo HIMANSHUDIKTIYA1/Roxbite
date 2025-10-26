@@ -1,20 +1,26 @@
-const foodModel = require('../modules/food');
+const foodModel = require('../modules/food')
 const storage = require('../services/storage.service');
 const {v4: uuid} = require('uuid');
+
 async function createFood(req, res) {
-     
-  
-    const {name ,description} = req.body;  
+
+    const { name, description } = req.body;
 
    const result = await storage.uploadFile(req.file.buffer, uuid() );
    
+  console.log("File uploaded to storage:", result);
   
  try {
 const food = new foodModel({
  name,
  description,
  videoUrl : result.url,
- foodPartner : req.foodPartner._id  
+ foodPartner : req.foodPartner._id  ,
+    ImageUrl : req.foodPartner.profileImage  ,
+    email : req.foodPartner.email  ,
+    phone : req.foodPartner.phone  ,
+    location : req.foodPartner.location  ,
+    Address : req.foodPartner.Address
 })
 await food.save();
 res.status(201).json({
